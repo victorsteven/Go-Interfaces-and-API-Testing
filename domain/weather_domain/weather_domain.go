@@ -15,3 +15,4 @@ type CurrentlyInfo struct {
 	Humidity float64 `json:"humidity"`
 }
 
+

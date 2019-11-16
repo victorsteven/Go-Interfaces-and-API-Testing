@@ -11,7 +11,7 @@ func TestWeather(t *testing.T) {
 		Latitude:     12.33,
 		Longitude:    90.34,
 		TimeZone:     "America/New_York",
-		CurrentState: Currently{
+		Currently: CurrentlyInfo{
 			Temperature: 10,
 			Summary:     "Clear",
 			DewPoint:    20.433,
@@ -30,9 +30,9 @@ func TestWeather(t *testing.T) {
 	assert.EqualValues(t,result.Latitude, request.Latitude)
 	assert.EqualValues(t,result.TimeZone, request.TimeZone)
 	assert.EqualValues(t,result.Longitude, request.Longitude)
-	assert.EqualValues(t,result.CurrentState.Summary, request.CurrentState.Summary)
-	assert.EqualValues(t,result.CurrentState.Humidity, request.CurrentState.Humidity)
-	assert.EqualValues(t,result.CurrentState.DewPoint, request.CurrentState.DewPoint)
-	assert.EqualValues(t,result.CurrentState.Pressure, request.CurrentState.Pressure)
-	assert.EqualValues(t,result.CurrentState.Temperature, request.CurrentState.Temperature)
+	assert.EqualValues(t,result.Currently.Summary, request.Currently.Summary)
+	assert.EqualValues(t,result.Currently.Humidity, request.Currently.Humidity)
+	assert.EqualValues(t,result.Currently.DewPoint, request.Currently.DewPoint)
+	assert.EqualValues(t,result.Currently.Pressure, request.Currently.Pressure)
+	assert.EqualValues(t,result.Currently.Temperature, request.Currently.Temperature)
 }
