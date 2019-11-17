@@ -27,8 +27,8 @@ func GetWeather(accessToken string, latitude float64, longitude float64) (*weath
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, &weather_domain.WeatherError{
-			Code: http.StatusInternalServerError,
-			Error:    err.Error(),
+			Code: http.StatusForbidden,
+			Error:    "Invalid response body",
 		}
 	}
 	defer response.Body.Close()

@@ -38,4 +38,76 @@ func TestGetWeatherNoError(t *testing.T) {
 	assert.EqualValues(t, 12.90, response.Currently.Pressure)
 }
 
+func TestGetWeatherInvalidApiKey(t *testing.T) {
+	restclient.FlushMockups()
+	restclient.AddMockup(restclient.Mock{
+		Url:        "https://api.darksky.net/forecast/wrong_anything/44.3601,-71.0589",
+		HttpMethod: http.MethodGet,
+		Response: &http.Response{
+			StatusCode: http.StatusForbidden,
+			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 403, "error": "permission denied"}`)),
+		},
+	})
+	response, err := GetWeather("wrong_anything", 44.3601, -71.0589)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
+	assert.EqualValues(t, http.StatusForbidden, err.Code)
+	assert.EqualValues(t, "permission denied", err.Error)
+}
+
+
+func TestGetWeatherInvalidLatitude(t *testing.T) {
+	restclient.FlushMockups()
+	restclient.AddMockup(restclient.Mock{
+		Url:        "https://api.darksky.net/forecast/anything/34223.3445,-71.0589",
+		HttpMethod: http.MethodGet,
+		Response: &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
+		},
+	})
+	response, err := GetWeather("anything", 34223.3445, -71.0589)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
+	assert.EqualValues(t, http.StatusBadRequest, err.Code)
+	assert.EqualValues(t, "The given location is invalid", err.Error)
+}
+
+func TestGetWeatherInvalidLongitude(t *testing.T) {
+	restclient.FlushMockups()
+	restclient.AddMockup(restclient.Mock{
+		Url:        "https://api.darksky.net/forecast/anything/44.3601,-74331.0589",
+		HttpMethod: http.MethodGet,
+		Response: &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
+		},
+	})
+	response, err := GetWeather("anything", 44.3601, -74331.0589)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
+	assert.EqualValues(t, http.StatusBadRequest, err.Code)
+	assert.EqualValues(t, "The given location is invalid", err.Error)
+}
+
+func TestGetWeatherInvalidFormat(t *testing.T) {
+	restclient.FlushMockups()
+	restclient.AddMockup(restclient.Mock{
+		Url:        "https://api.darksky.net/forecast/anything/0,-74331.0589",
+		HttpMethod: http.MethodGet,
+		Response: &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "Poorly formatted request"}`)),
+		},
+	})
+	response, err := GetWeather("anything", 0, -74331.0589)
+
+	assert.NotNil(t, err)
+	assert.Nil(t, response)
+	assert.EqualValues(t, http.StatusBadRequest, err.Code)
+	assert.EqualValues(t, "Poorly formatted request", err.Error)
+}
 
