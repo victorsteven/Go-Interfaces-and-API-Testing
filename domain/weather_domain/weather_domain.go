@@ -15,4 +15,10 @@ type CurrentlyInfo struct {
 	Humidity float64 `json:"humidity"`
 }
 
+type WeatherRequest struct {
+	ApiKey string `json:"api_key"`
+	Latitude float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
 
