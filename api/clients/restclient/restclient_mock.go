@@ -32,5 +32,4 @@ func AddMockup(mock Mock) {
 
 func FlushMockups() {
 	mocks = make(map[string]*Mock)
-
 }

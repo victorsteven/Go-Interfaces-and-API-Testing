@@ -13,7 +13,6 @@ func Get(url string) (*http.Response, error) {
 		if mock == nil {
 			return nil, errors.New("no mockup found for the given request")
 		}
-		//fmt.Println("this is the mock response: ", mock.Response)
 		return mock.Response, mock.Err
 	}
 	request, err := http.NewRequest(http.MethodGet, url, nil)

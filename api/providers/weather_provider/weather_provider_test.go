@@ -3,8 +3,8 @@ package weather_provider
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	"interface-testing/clients/restclient"
-	"interface-testing/domain/weather_domain"
+	"interface-testing/api/clients/restclient"
+	"interface-testing/api/domain/weather_domain"
 	"io/ioutil"
 	"net/http"
 	"os"
