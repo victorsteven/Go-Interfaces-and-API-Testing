@@ -8,7 +8,7 @@ import (
 type weatherService struct {}
 
 type weatherServiceInterface interface {
-	GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError)
+	GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface)
 }
 var (
 	WeatherService weatherServiceInterface
@@ -18,7 +18,7 @@ func init(){
 	WeatherService = &weatherService{}
 }
 
-func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError){
+func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface){
 	request := weather_domain.WeatherRequest{
 		ApiKey:    input.ApiKey,
 		Latitude:  input.Latitude,
@@ -26,10 +26,7 @@ func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weath
 	}
 	response, err := weather_provider.GetWeather(request)
 	if err != nil {
-		return nil, &weather_domain.WeatherError{
-			Code:  err.Code,
-			Error: err.Error,
-		}
+		return nil, weather_domain.NewWeatherError(err.Code, err.ErrorMessage)
 	}
 	result := weather_domain.Weather{
 		Latitude:  response.Latitude,

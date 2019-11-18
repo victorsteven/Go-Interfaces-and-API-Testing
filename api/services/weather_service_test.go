@@ -30,8 +30,8 @@ func TestWeatherServiceNoAuthKey(t *testing.T) {
 	result, err := WeatherService.GetWeather(request)
 	assert.Nil(t,result)
 	assert.NotNil(t, err)
-	assert.EqualValues(t, http.StatusForbidden, err.Code)
-	assert.EqualValues(t, "permission denied", err.Error)
+	assert.EqualValues(t, http.StatusForbidden, err.Status())
+	assert.EqualValues(t, "permission denied", err.Message())
 }
 
 func TestWeatherServiceWrongLatitude(t *testing.T) {
@@ -48,8 +48,8 @@ func TestWeatherServiceWrongLatitude(t *testing.T) {
 	result, err := WeatherService.GetWeather(request)
 	assert.Nil(t,result)
 	assert.NotNil(t, err)
-	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "The given location is invalid", err.Error)
+	assert.EqualValues(t, http.StatusBadRequest, err.Status())
+	assert.EqualValues(t, "The given location is invalid", err.Message())
 }
 
 func TestWeatherServiceWrongLongitude(t *testing.T) {
@@ -66,8 +66,8 @@ func TestWeatherServiceWrongLongitude(t *testing.T) {
 	result, err := WeatherService.GetWeather(request)
 	assert.Nil(t,result)
 	assert.NotNil(t, err)
-	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "The given location is invalid", err.Error)
+	assert.EqualValues(t, http.StatusBadRequest, err.Status())
+	assert.EqualValues(t, "The given location is invalid", err.Message())
 }
 
 func TestWeatherServiceSuccess(t *testing.T) {

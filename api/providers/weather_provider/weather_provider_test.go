@@ -2,6 +2,7 @@ package weather_provider
 
 import (
 	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"interface-testing/api/clients/restclient"
 	"interface-testing/api/domain/weather_domain"
@@ -52,10 +53,11 @@ func TestGetWeatherInvalidApiKey(t *testing.T) {
 		},
 	})
 	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
+	fmt.Println("this is the error here: ", err)
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusForbidden, err.Code)
-	assert.EqualValues(t, "permission denied", err.Error)
+	assert.EqualValues(t, "permission denied", err.ErrorMessage)
 }
 
 
@@ -74,7 +76,7 @@ func TestGetWeatherInvalidLatitude(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "The given location is invalid", err.Error)
+	assert.EqualValues(t, "The given location is invalid", err.ErrorMessage)
 }
 
 func TestGetWeatherInvalidLongitude(t *testing.T) {
@@ -92,7 +94,7 @@ func TestGetWeatherInvalidLongitude(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "The given location is invalid", err.Error)
+	assert.EqualValues(t, "The given location is invalid", err.ErrorMessage)
 }
 
 func TestGetWeatherInvalidFormat(t *testing.T) {
@@ -110,7 +112,7 @@ func TestGetWeatherInvalidFormat(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "Poorly formatted request", err.Error)
+	assert.EqualValues(t, "Poorly formatted request", err.ErrorMessage)
 }
 
 
@@ -126,7 +128,7 @@ func TestGetWeatherInvalidRestClient(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "invalid rest client response", err.Error)
+	assert.EqualValues(t, "invalid rest client response", err.ErrorMessage)
 }
 
 func TestGetWeatherInvalidResponseBody(t *testing.T) {
@@ -140,7 +142,7 @@ func TestGetWeatherInvalidResponseBody(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "Invalid response body", err.Error)
+	assert.EqualValues(t, "Invalid response body", err.ErrorMessage)
 }
 
 func TestGetWeatherInvalidRequest(t *testing.T) {
@@ -158,7 +160,7 @@ func TestGetWeatherInvalidRequest(t *testing.T) {
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
-	assert.EqualValues(t, "invalid argument", err.Error)
+	assert.EqualValues(t, "invalid argument", err.ErrorMessage)
 }
 
 //When the error response is invalid, here the code is supposed to be an integer, but a string was given.
@@ -177,7 +179,7 @@ func TestGetWeatherInvalidErrorInterface(t *testing.T) {
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Code)
-	assert.EqualValues(t, "invalid json response body", err.Error)
+	assert.EqualValues(t, "invalid json response body", err.ErrorMessage)
 }
 
 //We are getting a postive response from the api, but, the datatype of the response returned does not match the struct datatype we have defined (does not match the struct type we want to unmarshal this response into).
@@ -195,7 +197,7 @@ func TestGetWeatherInvalidResponseInterface(t *testing.T) {
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Code)
-	assert.EqualValues(t, "error unmarshaling weather fetch response", err.Error)
+	assert.EqualValues(t, "error unmarshaling weather fetch response", err.ErrorMessage)
 }
 
 

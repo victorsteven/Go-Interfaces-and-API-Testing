@@ -1,25 +1,28 @@
 package weather_domain
 
-
-type WeatherError struct {
+type WeatherErrorResponse struct {
 	Code      int           `json:"code"`
-	Error     string        `json:"error"`
+	ErrorMessage     string        `json:"error"` //this is the response json
+}
+type weatherError struct {
+	Code      int           `json:"code"`
+	ErrorMessage     string        `json:"error"` //this is the response json
+}
+type WeatherErrorInterface interface {
+	Status() int
+	Message() string
+}
+func (w *weatherError) Status() int {
+	return w.Code
+}
+func (w *weatherError) Message() string {
+	return w.ErrorMessage
+}
+func NewWeatherError(statusCode int, message string) WeatherErrorInterface {
+	return &weatherError{
+		Code:         statusCode,
+		ErrorMessage: message,
+	}
 }
 
-type GithubErrorResponse struct {
-	StatusCode       int           `json"status_code"`
-	Message          string        `json:"message"`
-	DocumentationUrl string        `json:"documentation_url"`
-	Errors           []GithubError `json:"errors"`
-}
 
-func (r GithubErrorResponse) Error() string {
-	return r.Message
-}
-
-type GithubError struct {
-	Resource string `json:"resource"`
-	Code     string `json:"code"`
-	Field    string `json:"field"`
-	Message  string `json:"message"`
-}
