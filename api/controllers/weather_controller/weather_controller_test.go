@@ -30,11 +30,6 @@ func (w *weatherServiceMock) GetWeather(request weather_domain.WeatherRequest) (
 	return getWeatheFunc(request)
 }
 
-//func GetMockedContext(request *http.Request, response *httptest.ResponseRecorder) *gin.Context {
-//	c, _ := gin.CreateTestContext(response)
-//	c.Request = request
-//	return c
-//}
 
 func TestGetWeatherLatitudeInvalid(t *testing.T) {
 	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
@@ -46,7 +41,7 @@ func TestGetWeatherLatitudeInvalid(t *testing.T) {
 	c.Request, _ = http.NewRequest(http.MethodGet, "", nil)
 	c.Params = gin.Params{
 		{Key: "apiKey", Value: "right_api_key"},
-		{Key: "latitude", Value: fmt.Sprintf("%f", 122334.78)},
+		{Key: "latitude", Value:  "1rte4.78"},
 		{Key: "longitude", Value: fmt.Sprintf("%f", 42.78)},
 	}
 	GetWeather(c)
@@ -70,7 +65,7 @@ func TestGetWeatherLongitudeInvalid(t *testing.T) {
 	c.Params = gin.Params{
 		{Key: "apiKey", Value: "right_api_key"},
 		{Key: "latitude", Value: fmt.Sprintf("%f", 12.78)},
-		{Key: "longitude", Value: fmt.Sprintf("%f", 423243.78)},
+		{Key: "longitude", Value:  "23awe.78"},
 	}
 	GetWeather(c)
 	assert.EqualValues(t, http.StatusBadRequest, response.Code)
@@ -79,6 +74,51 @@ func TestGetWeatherLongitudeInvalid(t *testing.T) {
 	assert.NotNil(t, apiErr)
 	assert.EqualValues(t, http.StatusBadRequest, apiErr.Status())
 	assert.EqualValues(t, "invalid longitude body", apiErr.Message())
+}
+
+func TestGetWeatherLatitudeInvalidLocation(t *testing.T) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+		return nil, weather_domain.NewBadRequestError("The given location is invalid")
+	}
+	services.WeatherService = &weatherServiceMock{}
+	response := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(response)
+	c.Request, _ = http.NewRequest(http.MethodGet, "", nil)
+	c.Params = gin.Params{
+		{Key: "apiKey", Value: "right_api_key"},
+		{Key: "latitude", Value: fmt.Sprintf("%f", 122334.78)},
+		{Key: "longitude", Value: fmt.Sprintf("%f", 42.78)},
+	}
+	GetWeather(c)
+	assert.EqualValues(t, http.StatusBadRequest, response.Code)
+	apiErr, err := weather_domain.NewApiErrFromBytes(response.Body.Bytes())
+	assert.Nil(t, err)
+	assert.NotNil(t, apiErr)
+	assert.EqualValues(t, http.StatusBadRequest, apiErr.Status())
+	assert.EqualValues(t, "The given location is invalid", apiErr.Message())
+}
+
+func TestGetWeatherLongitudeInvalidLocation(t *testing.T) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+		return nil, weather_domain.NewBadRequestError("The given location is invalid")
+	}
+	services.WeatherService = &weatherServiceMock{}
+
+	response := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(response)
+	c.Request, _ = http.NewRequest(http.MethodGet, "", nil)
+	c.Params = gin.Params{
+		{Key: "apiKey", Value: "right_api_key"},
+		{Key: "latitude", Value: fmt.Sprintf("%f", 12.78)},
+		{Key: "longitude", Value: fmt.Sprintf("%f", 423243.78)},
+	}
+	GetWeather(c)
+	assert.EqualValues(t, http.StatusBadRequest, response.Code)
+	apiErr, err := weather_domain.NewApiErrFromBytes(response.Body.Bytes())
+	assert.Nil(t, err)
+	assert.NotNil(t, apiErr)
+	assert.EqualValues(t, http.StatusBadRequest, apiErr.Status())
+	assert.EqualValues(t, "The given location is invalid", apiErr.Message())
 }
 
 ////When the run status code is supplied
