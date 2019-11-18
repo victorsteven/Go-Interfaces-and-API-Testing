@@ -2,7 +2,6 @@ package weather_domain
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
@@ -48,7 +47,7 @@ func NewForbiddenError(message string) WeatherErrorInterface {
 func NewApiErrFromBytes(body []byte) (WeatherErrorInterface, error) {
 	var result weatherError
 	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, errors.New("invalid json for creating an api error")
+		return nil, err
 	}
 	return &result, nil
 }
