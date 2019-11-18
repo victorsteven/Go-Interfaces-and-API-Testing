@@ -8,29 +8,13 @@ import (
 	"strconv"
 )
 func GetWeather(c *gin.Context){
-
-	lat, err := strconv.ParseFloat(c.Param("latitude"), 64)
-	if err != nil {
-		apiError := weather_domain.WeatherErrorResponse{Code: http.StatusBadRequest, ErrorMessage:"invalid latitude body"}
-		c.JSON(apiError.Code, apiError)
-		return
-	}
-	long, err := strconv.ParseFloat(c.Param("longitude"), 64)
-	if err != nil {
-		apiError := weather_domain.WeatherErrorResponse{Code: http.StatusBadRequest, ErrorMessage:"invalid longitude body"}
-		c.JSON(apiError.Code, apiError)
-		return
-	}
+	long, _ := strconv.ParseFloat(c.Param("longitude"), 64)
+	lat, _ := strconv.ParseFloat(c.Param("latitude"), 64)
 	request :=  weather_domain.WeatherRequest{
 		ApiKey:    c.Param("apiKey"),
 		Latitude:  lat,
 		Longitude: long,
 	}
-	//if err := c.ShouldBindJSON(&request); err != nil {
-	//	//	apiError := weather_domain.WeatherErrorResponse{ErrorMessage:"invalid json body"}
-	//	//	c.JSON(apiError.Code, apiError)
-	//	//	return
-	//	//}
 	result, apiError := services.WeatherService.GetWeather(request)
 	if apiError != nil {
 		c.JSON(apiError.Status(), apiError)

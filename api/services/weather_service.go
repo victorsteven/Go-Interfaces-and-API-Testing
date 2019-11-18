@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"interface-testing/api/domain/weather_domain"
 	"interface-testing/api/providers/weather_provider"
 )
@@ -26,6 +27,7 @@ func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weath
 	}
 	response, err := weather_provider.GetWeather(request)
 	if err != nil {
+		fmt.Println("this is where the error happened")
 		return nil, weather_domain.NewWeatherError(err.Code, err.ErrorMessage)
 	}
 	result := weather_domain.Weather{

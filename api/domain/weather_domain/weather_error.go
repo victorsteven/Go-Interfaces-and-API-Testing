@@ -1,5 +1,11 @@
 package weather_domain
 
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+)
+
 type WeatherErrorResponse struct {
 	Code      int           `json:"code"`
 	ErrorMessage     string        `json:"error"` //this is the response json
@@ -18,11 +24,33 @@ func (w *weatherError) Status() int {
 func (w *weatherError) Message() string {
 	return w.ErrorMessage
 }
+
 func NewWeatherError(statusCode int, message string) WeatherErrorInterface {
 	return &weatherError{
 		Code:         statusCode,
 		ErrorMessage: message,
 	}
+}
+func NewBadRequestError(message string) WeatherErrorInterface {
+	return &weatherError{
+		Code: http.StatusBadRequest,
+		ErrorMessage: message,
+	}
+}
+
+func NewForbiddenError(message string) WeatherErrorInterface {
+	return &weatherError{
+		Code: http.StatusForbidden,
+		ErrorMessage: message,
+	}
+}
+
+func NewApiErrFromBytes(body []byte) (WeatherErrorInterface, error) {
+	var result weatherError
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, errors.New("invalid json for creating an api error")
+	}
+	return &result, nil
 }
 
 
