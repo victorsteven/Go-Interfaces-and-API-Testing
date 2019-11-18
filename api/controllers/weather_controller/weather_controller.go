@@ -12,7 +12,7 @@ func GetWeather(c *gin.Context){
 	lat, err := strconv.ParseFloat(c.Param("latitude"), 64)
 	if err != nil {
 		apiError := weather_domain.WeatherErrorResponse{Code: http.StatusBadRequest, ErrorMessage:"invalid latitude body"}
-		c.JSON(apiError.Code, err)
+		c.JSON(apiError.Code, apiError)
 		return
 	}
 	long, err := strconv.ParseFloat(c.Param("longitude"), 64)
@@ -21,12 +21,6 @@ func GetWeather(c *gin.Context){
 		c.JSON(apiError.Code, apiError)
 		return
 	}
-	//secretCode, err := strconv.ParseFloat(c.Param("apiKey"), 64)
-	//if err != nil {
-	//	apiError := weather_domain.WeatherErrorResponse{Code: http.StatusBadRequest, ErrorMessage:"invalid longitude body"}
-	//	c.JSON(apiError.Code, apiError)
-	//	return
-	//}
 	request :=  weather_domain.WeatherRequest{
 		ApiKey:    c.Param("apiKey"),
 		Latitude:  lat,
@@ -39,7 +33,7 @@ func GetWeather(c *gin.Context){
 	//	//}
 	result, apiError := services.WeatherService.GetWeather(request)
 	if apiError != nil {
-		c.JSON(apiError.Status(), err)
+		c.JSON(apiError.Status(), apiError)
 		return
 	}
 	c.JSON(http.StatusOK, result)
