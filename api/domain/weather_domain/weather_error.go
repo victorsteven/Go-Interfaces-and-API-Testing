@@ -5,47 +5,44 @@ import (
 	"net/http"
 )
 
-type WeatherErrorResponse struct {
-	Code      int           `json:"code"`
-	ErrorMessage     string        `json:"error"` //this is the response json
-}
-type weatherError struct {
-	Code      int           `json:"code"`
-	ErrorMessage     string        `json:"error"` //this is the response json
-}
 type WeatherErrorInterface interface {
 	Status() int
 	Message() string
 }
-func (w *weatherError) Status() int {
+type WeatherError struct {
+	Code      int           `json:"code"`
+	ErrorMessage     string        `json:"error"`
+}
+
+func (w *WeatherError) Status() int {
 	return w.Code
 }
-func (w *weatherError) Message() string {
+func (w *WeatherError) Message() string {
 	return w.ErrorMessage
 }
 
 func NewWeatherError(statusCode int, message string) WeatherErrorInterface {
-	return &weatherError{
+	return &WeatherError{
 		Code:         statusCode,
 		ErrorMessage: message,
 	}
 }
 func NewBadRequestError(message string) WeatherErrorInterface {
-	return &weatherError{
+	return &WeatherError{
 		Code: http.StatusBadRequest,
 		ErrorMessage: message,
 	}
 }
 
 func NewForbiddenError(message string) WeatherErrorInterface {
-	return &weatherError{
+	return &WeatherError{
 		Code: http.StatusForbidden,
 		ErrorMessage: message,
 	}
 }
 
 func NewApiErrFromBytes(body []byte) (WeatherErrorInterface, error) {
-	var result weatherError
+	var result WeatherError
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
 	}

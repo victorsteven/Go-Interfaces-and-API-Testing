@@ -22,3 +22,4 @@ func GetWeather(c *gin.Context){
 	}
 	c.JSON(http.StatusOK, result)
 }
+

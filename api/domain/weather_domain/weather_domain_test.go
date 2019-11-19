@@ -36,3 +36,20 @@ func TestWeather(t *testing.T) {
 	assert.EqualValues(t, result.Currently.Pressure, request.Currently.Pressure)
 	assert.EqualValues(t, result.Currently.Temperature, request.Currently.Temperature)
 }
+
+func TestWeatherError(t *testing.T) {
+	request := WeatherError{
+		Code:         400,
+		ErrorMessage: "Bad Request Error",
+	}
+	bytes, err := json.Marshal(request)
+	assert.Nil(t, err)
+	assert.NotNil(t, bytes)
+
+	var errResult WeatherError
+	err = json.Unmarshal(bytes, &errResult)
+	assert.Nil(t, err)
+	assert.EqualValues(t, errResult.Code, request.Code)
+	assert.EqualValues(t, errResult.ErrorMessage, request.ErrorMessage)
+
+}

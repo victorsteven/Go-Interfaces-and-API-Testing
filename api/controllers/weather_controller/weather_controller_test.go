@@ -121,7 +121,6 @@ func TestGetWeatherLongitudeInvalidLocation(t *testing.T) {
 	assert.EqualValues(t, "The given location is invalid", apiErr.Message())
 }
 
-////When the run status code is supplied
 func TestGetWeatherInvalidKey(t *testing.T) {
 	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewForbiddenError("permission denied")
@@ -136,7 +135,7 @@ func TestGetWeatherInvalidKey(t *testing.T) {
 		{Key: "longitude", Value: fmt.Sprintf("%f", 42.78)},
 	}
 	GetWeather(c)
-	var apiError weather_domain.WeatherErrorResponse
+	var apiError weather_domain.WeatherError
 	err := json.Unmarshal(response.Body.Bytes(), &apiError)
 	assert.Nil(t, err)
 	assert.EqualValues(t, http.StatusForbidden, response.Code)

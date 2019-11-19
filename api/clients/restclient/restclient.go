@@ -15,6 +15,7 @@ func Get(url string) (*http.Response, error) {
 		}
 		return mock.Response, mock.Err
 	}
+	//Make a get request
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err

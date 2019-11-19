@@ -23,9 +23,6 @@ func getMockId(httpMethod string, url string) string {
 func StartMockups() {
 	enableMocks = true
 }
-func StopMockups() {
-	enableMocks = false
-}
 func AddMockup(mock Mock) {
 	mocks[getMockId(mock.HttpMethod, mock.Url)] = &mock
 }
