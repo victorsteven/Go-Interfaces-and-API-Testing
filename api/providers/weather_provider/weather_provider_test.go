@@ -1,9 +1,7 @@
 package weather_provider
 
 import (
-	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"interface-testing/api/clients/restclient"
 	"interface-testing/api/domain/weather_domain"
 	"io/ioutil"
@@ -11,24 +9,48 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(m *testing.M) {
-	restclient.StartMockups()
-	os.Exit(m.Run())
+// func TestMain(m *testing.M) {
+// 	restclient.StartMockups()
+// 	os.Exit(m.Run())
+// }
+
+// var (
+// 	getRequestFunc func(url string) (*http.Response, error)
+// )
+
+// type getClientMock struct{}
+
+// //We are mocking the service method "Get"
+// func (c *getClientMock) Get(request string) (*http.Response, error) {
+// 	return getRequestFunc(request)
+// }
+
+var (
+	getRequestFunc func(url string) (*http.Response, error)
+)
+
+type getClientMock struct{}
+
+//We are mocking the service method "Get"
+func (cm *getClientMock) Get(request string) (*http.Response, error) {
+	return getRequestFunc(request)
 }
 
 //When the everything is good
 func TestGetWeatherNoError(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/44.3601,-71.0589", //this should match with the parameters supplied to the GetWeather below
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	// The error we will get is from the "response" so we make the second parameter of the function is nil
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       ioutil.NopCloser(strings.NewReader(`{"latitude": 44.3601, "longitude": -71.0589, "timezone": "America/New_York", "currently": {"summary": "Clear", "temperature": 40.22, "dewPoint": 50.22, "pressure": 12.90, "humidity": 16.54}}`)),
-		},
-	})
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
@@ -43,15 +65,14 @@ func TestGetWeatherNoError(t *testing.T) {
 }
 
 func TestGetWeatherInvalidApiKey(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/wrong_anything/44.3601,-71.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusForbidden,
-			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 403, "error": "permission denied"}`)),
-		},
-	})
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 403, "error": "permission denied"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	fmt.Println("this is the error here: ", err)
 	assert.NotNil(t, err)
@@ -60,17 +81,15 @@ func TestGetWeatherInvalidApiKey(t *testing.T) {
 	assert.EqualValues(t, "permission denied", err.ErrorMessage)
 }
 
-
 func TestGetWeatherInvalidLatitude(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/34223.3445,-71.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusBadRequest,
-			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
-		},
-	})
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 34223.3445, -71.0589})
 
 	assert.NotNil(t, err)
@@ -80,15 +99,14 @@ func TestGetWeatherInvalidLatitude(t *testing.T) {
 }
 
 func TestGetWeatherInvalidLongitude(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/44.3601,-74331.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusBadRequest,
-			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
-		},
-	})
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -74331.0589})
 
 	assert.NotNil(t, err)
@@ -98,15 +116,14 @@ func TestGetWeatherInvalidLongitude(t *testing.T) {
 }
 
 func TestGetWeatherInvalidFormat(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/0,-74331.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusBadRequest,
-			Body:  ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "Poorly formatted request"}`)),
-		},
-	})
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "Poorly formatted request"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
 
 	assert.NotNil(t, err)
@@ -115,15 +132,16 @@ func TestGetWeatherInvalidFormat(t *testing.T) {
 	assert.EqualValues(t, "Poorly formatted request", err.ErrorMessage)
 }
 
-
 //When no body is provided
 func TestGetWeatherInvalidRestClient(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/0,-74331.0589",
-		HttpMethod: http.MethodGet,
-		Err: errors.New("invalid rest client response"),
-	})
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "invalid rest client response"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -132,12 +150,14 @@ func TestGetWeatherInvalidRestClient(t *testing.T) {
 }
 
 func TestGetWeatherInvalidResponseBody(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/wrong_anything/44.3601,-71.0589",
-		HttpMethod: http.MethodGet,
-		Err: errors.New("Invalid response body"),
-	})
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "Invalid response body"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -146,16 +166,15 @@ func TestGetWeatherInvalidResponseBody(t *testing.T) {
 }
 
 func TestGetWeatherInvalidRequest(t *testing.T) {
-	restclient.FlushMockups()
-	invalidCloser, _ := os.Open("-asf3")
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/wrong_anything/44.3601,-71.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		invalidCloser, _ := os.Open("-asf3")
+		return &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Body:       invalidCloser,
-		},
-	})
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
@@ -166,15 +185,15 @@ func TestGetWeatherInvalidRequest(t *testing.T) {
 //When the error response is invalid, here the code is supposed to be an integer, but a string was given.
 //This can happen when the api owner changes some data types in the api
 func TestGetWeatherInvalidErrorInterface(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/44.3601,-71.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
-			StatusCode: http.StatusInternalServerError,
-			Body:  ioutil.NopCloser(strings.NewReader(`{"code": "string code"}`)),
-		},
-	})
+
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       ioutil.NopCloser(strings.NewReader(`{"code": "string code"}`)),
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
@@ -184,20 +203,17 @@ func TestGetWeatherInvalidErrorInterface(t *testing.T) {
 
 //We are getting a postive response from the api, but, the datatype of the response returned does not match the struct datatype we have defined (does not match the struct type we want to unmarshal this response into).
 func TestGetWeatherInvalidResponseInterface(t *testing.T) {
-	restclient.FlushMockups()
-	restclient.AddMockup(restclient.Mock{
-		Url:        "https://api.darksky.net/forecast/anything/44.3601,-71.0589",
-		HttpMethod: http.MethodGet,
-		Response: &http.Response{
+	getRequestFunc = func(url string) (*http.Response, error) {
+		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       ioutil.NopCloser(strings.NewReader(`{"latitude": "string latitude", "longitude": -71.0589, "timezone": "America/New_York"}`)), //when we use string for latitude instead of float
-		},
-	})
+		}, nil
+	}
+	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+
 	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Code)
 	assert.EqualValues(t, "error unmarshaling weather fetch response", err.ErrorMessage)
 }
-
-

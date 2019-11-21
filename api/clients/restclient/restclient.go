@@ -1,21 +1,24 @@
 package restclient
 
 import (
-	"errors"
 	"net/http"
 )
 
+type clientStruct struct{}
 
+type ClientInterface interface {
+	Get(string) (*http.Response, error)
+}
 
-func Get(url string) (*http.Response, error) {
-	if enableMocks {
-		mock := mocks[getMockId(http.MethodGet, url)]
-		if mock == nil {
-			return nil, errors.New("no mockup found for the given request")
-		}
-		return mock.Response, mock.Err
-	}
-	//Make a get request
+var (
+	ClientStruct ClientInterface
+)
+
+func init() {
+	ClientStruct = &clientStruct{}
+}
+
+func (ci *clientStruct) Get(url string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -24,4 +27,3 @@ func Get(url string) (*http.Response, error) {
 
 	return client.Do(request)
 }
-

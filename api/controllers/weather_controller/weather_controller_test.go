@@ -3,36 +3,29 @@ package weather_controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"interface-testing/api/clients/restclient"
 	"interface-testing/api/domain/weather_domain"
 	"interface-testing/api/services"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
-)
 
-func TestMain(m *testing.M){
-	restclient.StartMockups()
-	os.Exit(m.Run())
-}
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+)
 
 var (
 	getWeatheFunc func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface)
 )
 
-type weatherServiceMock struct {}
+type weatherServiceMock struct{}
 
 //We are mocking the service method "GetWeather"
 func (w *weatherServiceMock) GetWeather(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 	return getWeatheFunc(request)
 }
 
-
 func TestGetWeatherLatitudeInvalid(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewBadRequestError("invalid latitude body")
 	}
 	services.WeatherService = &weatherServiceMock{}
@@ -41,7 +34,7 @@ func TestGetWeatherLatitudeInvalid(t *testing.T) {
 	c.Request, _ = http.NewRequest(http.MethodGet, "", nil)
 	c.Params = gin.Params{
 		{Key: "apiKey", Value: "right_api_key"},
-		{Key: "latitude", Value:  "1rte4.78"},
+		{Key: "latitude", Value: "1rte4.78"},
 		{Key: "longitude", Value: fmt.Sprintf("%f", 42.78)},
 	}
 	GetWeather(c)
@@ -54,7 +47,7 @@ func TestGetWeatherLatitudeInvalid(t *testing.T) {
 }
 
 func TestGetWeatherLongitudeInvalid(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewBadRequestError("invalid longitude body")
 	}
 	services.WeatherService = &weatherServiceMock{}
@@ -65,7 +58,7 @@ func TestGetWeatherLongitudeInvalid(t *testing.T) {
 	c.Params = gin.Params{
 		{Key: "apiKey", Value: "right_api_key"},
 		{Key: "latitude", Value: fmt.Sprintf("%f", 12.78)},
-		{Key: "longitude", Value:  "23awe.78"},
+		{Key: "longitude", Value: "23awe.78"},
 	}
 	GetWeather(c)
 	assert.EqualValues(t, http.StatusBadRequest, response.Code)
@@ -77,7 +70,7 @@ func TestGetWeatherLongitudeInvalid(t *testing.T) {
 }
 
 func TestGetWeatherLatitudeInvalidLocation(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewBadRequestError("The given location is invalid")
 	}
 	services.WeatherService = &weatherServiceMock{}
@@ -99,7 +92,7 @@ func TestGetWeatherLatitudeInvalidLocation(t *testing.T) {
 }
 
 func TestGetWeatherLongitudeInvalidLocation(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewBadRequestError("The given location is invalid")
 	}
 	services.WeatherService = &weatherServiceMock{}
@@ -122,7 +115,7 @@ func TestGetWeatherLongitudeInvalidLocation(t *testing.T) {
 }
 
 func TestGetWeatherInvalidKey(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return nil, weather_domain.NewForbiddenError("permission denied")
 	}
 	services.WeatherService = &weatherServiceMock{}
@@ -141,9 +134,10 @@ func TestGetWeatherInvalidKey(t *testing.T) {
 	assert.EqualValues(t, http.StatusForbidden, response.Code)
 	assert.EqualValues(t, "permission denied", apiError.ErrorMessage)
 }
+
 //
 func TestGetWeatherSuccess(t *testing.T) {
-	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather,  weather_domain.WeatherErrorInterface) {
+	getWeatheFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface) {
 		return &weather_domain.Weather{
 			Latitude:  20.34,
 			Longitude: -12.44,
