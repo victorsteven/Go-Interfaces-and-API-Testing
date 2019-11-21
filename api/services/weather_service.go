@@ -11,12 +11,8 @@ type weatherServiceInterface interface {
 	GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface)
 }
 var (
-	WeatherService weatherServiceInterface
+	WeatherService weatherServiceInterface = &weatherService{}
 )
-//The struct is implementing the "weatherServiceInterface" so, it must have all the method that the interface defines
-func init(){
-	WeatherService = &weatherService{}
-}
 
 func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weather_domain.Weather, weather_domain.WeatherErrorInterface){
 	request := weather_domain.WeatherRequest{
@@ -24,7 +20,7 @@ func (w *weatherService) GetWeather(input weather_domain.WeatherRequest) (*weath
 		Latitude:  input.Latitude,
 		Longitude: input.Longitude,
 	}
-	response, err := weather_provider.GetWeather(request)
+	response, err := weather_provider.WeatherProvider.GetWeather(request)
 	if err != nil {
 		return nil, weather_domain.NewWeatherError(err.Code, err.ErrorMessage)
 	}

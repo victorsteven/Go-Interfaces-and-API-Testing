@@ -13,9 +13,16 @@ import (
 const (
 	weatherUrl = "https://api.darksky.net/forecast/%s/%v,%v"
 )
+type weatherProvider struct {}
 
-func GetWeather(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
-	fmt.Println("we get here for service test")
+type weatherServiceInterface interface {
+	GetWeather(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError)
+}
+var (
+	WeatherProvider weatherServiceInterface = &weatherProvider{}
+)
+
+func (p *weatherProvider) GetWeather(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
 	url := fmt.Sprintf(weatherUrl, request.ApiKey, request.Latitude, request.Longitude)
 	response, err := restclient.ClientStruct.Get(url)
 	if err != nil {

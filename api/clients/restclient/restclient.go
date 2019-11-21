@@ -9,14 +9,9 @@ type clientStruct struct{}
 type ClientInterface interface {
 	Get(string) (*http.Response, error)
 }
-
 var (
-	ClientStruct ClientInterface
+	ClientStruct ClientInterface = &clientStruct{}
 )
-
-func init() {
-	ClientStruct = &clientStruct{}
-}
 
 func (ci *clientStruct) Get(url string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, url, nil)

@@ -51,7 +51,7 @@ func TestGetWeatherNoError(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.NotNil(t, response)
 	assert.Nil(t, err)
 	assert.EqualValues(t, 44.3601, response.Latitude)
@@ -73,7 +73,7 @@ func TestGetWeatherInvalidApiKey(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	fmt.Println("this is the error here: ", err)
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -90,7 +90,7 @@ func TestGetWeatherInvalidLatitude(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 34223.3445, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 34223.3445, -71.0589})
 
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -107,7 +107,7 @@ func TestGetWeatherInvalidLongitude(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -74331.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -74331.0589})
 
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -124,7 +124,7 @@ func TestGetWeatherInvalidFormat(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
 
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
@@ -142,7 +142,7 @@ func TestGetWeatherInvalidRestClient(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 0, -74331.0589})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -158,7 +158,7 @@ func TestGetWeatherInvalidResponseBody(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -175,7 +175,7 @@ func TestGetWeatherInvalidRequest(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusBadRequest, err.Code)
@@ -185,7 +185,6 @@ func TestGetWeatherInvalidRequest(t *testing.T) {
 //When the error response is invalid, here the code is supposed to be an integer, but a string was given.
 //This can happen when the api owner changes some data types in the api
 func TestGetWeatherInvalidErrorInterface(t *testing.T) {
-
 	getRequestFunc = func(url string) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusBadRequest,
@@ -194,7 +193,7 @@ func TestGetWeatherInvalidErrorInterface(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Code)
@@ -211,7 +210,7 @@ func TestGetWeatherInvalidResponseInterface(t *testing.T) {
 	}
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
-	response, err := GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
+	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"anything", 44.3601, -71.0589})
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Code)

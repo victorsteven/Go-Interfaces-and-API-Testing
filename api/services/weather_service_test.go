@@ -1,36 +1,31 @@
 package services
 
 import (
-	"interface-testing/api/clients/restclient"
 	"interface-testing/api/domain/weather_domain"
-	"io/ioutil"
+	"interface-testing/api/providers/weather_provider"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	getRequestFunc func(url string) (*http.Response, error)
+	getWeatherProviderFunc func(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError)
 )
+type getProviderMock struct{}
 
-type getClientMock struct{}
-
-//We are mocking the service method "Get"
-func (c *getClientMock) Get(request string) (*http.Response, error) {
-	return getRequestFunc(request)
+func (c *getProviderMock) GetWeather(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
+	return getWeatherProviderFunc(request)
 }
 
 func TestWeatherServiceNoAuthKey(t *testing.T) {
-	// The error we will get is from the "response" so we make the second parameter of the function is nil
-	getRequestFunc = func(url string) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusForbidden,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 403, "error": "permission denied"}`)),
-		}, nil
+	getWeatherProviderFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
+		return nil, &weather_domain.WeatherError{
+			Code:         403,
+			ErrorMessage: "permission denied",
+		}
 	}
-	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+	weather_provider.WeatherProvider = &getProviderMock{} //without this line, the real api is fired
 
 	request := weather_domain.WeatherRequest{ApiKey: "wrong_key", Latitude: 44.3601, Longitude: -71.0589}
 	result, err := WeatherService.GetWeather(request)
@@ -41,13 +36,13 @@ func TestWeatherServiceNoAuthKey(t *testing.T) {
 }
 
 func TestWeatherServiceWrongLatitude(t *testing.T) {
-	getRequestFunc = func(url string) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
-		}, nil
+	getWeatherProviderFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
+		return nil, &weather_domain.WeatherError{
+			Code:         400,
+			ErrorMessage: "The given location is invalid",
+		}
 	}
-	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+	weather_provider.WeatherProvider = &getProviderMock{} //without this line, the real api is fired
 
 	request := weather_domain.WeatherRequest{ApiKey: "api_key", Latitude: 123443, Longitude: -71.0589}
 	result, err := WeatherService.GetWeather(request)
@@ -58,13 +53,13 @@ func TestWeatherServiceWrongLatitude(t *testing.T) {
 }
 
 func TestWeatherServiceWrongLongitude(t *testing.T) {
-	getRequestFunc = func(url string) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusBadRequest,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"code": 400, "error": "The given location is invalid"}`)),
-		}, nil
+	getWeatherProviderFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
+		return nil, &weather_domain.WeatherError{
+			Code:         400,
+			ErrorMessage: "The given location is invalid",
+		}
 	}
-	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+	weather_provider.WeatherProvider = &getProviderMock{} //without this line, the real api is fired
 
 	request := weather_domain.WeatherRequest{ApiKey: "api_key", Latitude: 39.12, Longitude: 122332}
 	result, err := WeatherService.GetWeather(request)
@@ -75,13 +70,21 @@ func TestWeatherServiceWrongLongitude(t *testing.T) {
 }
 
 func TestWeatherServiceSuccess(t *testing.T) {
-	getRequestFunc = func(url string) (*http.Response, error) {
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{"latitude": 39.12, "longitude": 49.12, "timezone": "America/New_York", "currently": {"summary": "Clear", "temperature": 40.22, "dewPoint": 50.22, "pressure": 12.90, "humidity": 16.54}}`)),
+	getWeatherProviderFunc = func(request weather_domain.WeatherRequest) (*weather_domain.Weather, *weather_domain.WeatherError) {
+		return &weather_domain.Weather{
+			Latitude:  39.12,
+			Longitude: 49.12,
+			TimeZone:  "America/New_York",
+			Currently: weather_domain.CurrentlyInfo{
+				Temperature: 40.22,
+				Summary:     "Clear",
+				DewPoint:    50.22,
+				Pressure:    12.90,
+				Humidity:    16.54,
+			},
 		}, nil
 	}
-	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
+	weather_provider.WeatherProvider = &getProviderMock{} //without this line, the real api is fired
 
 	request := weather_domain.WeatherRequest{ApiKey: "api_key", Latitude: 39.12, Longitude: 49.12}
 	result, err := WeatherService.GetWeather(request)
