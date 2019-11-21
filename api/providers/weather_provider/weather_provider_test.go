@@ -1,7 +1,6 @@
 package weather_provider
 
 import (
-	"fmt"
 	"interface-testing/api/clients/restclient"
 	"interface-testing/api/domain/weather_domain"
 	"io/ioutil"
@@ -13,29 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestMain(m *testing.M) {
-// 	restclient.StartMockups()
-// 	os.Exit(m.Run())
-// }
-
-// var (
-// 	getRequestFunc func(url string) (*http.Response, error)
-// )
-
-// type getClientMock struct{}
-
-// //We are mocking the service method "Get"
-// func (c *getClientMock) Get(request string) (*http.Response, error) {
-// 	return getRequestFunc(request)
-// }
-
 var (
 	getRequestFunc func(url string) (*http.Response, error)
 )
 
 type getClientMock struct{}
 
-//We are mocking the service method "Get"
+//We are mocking the client method "Get"
 func (cm *getClientMock) Get(request string) (*http.Response, error) {
 	return getRequestFunc(request)
 }
@@ -74,7 +57,6 @@ func TestGetWeatherInvalidApiKey(t *testing.T) {
 	restclient.ClientStruct = &getClientMock{} //without this line, the real api is fired
 
 	response, err := WeatherProvider.GetWeather(weather_domain.WeatherRequest{"wrong_anything", 44.3601, -71.0589})
-	fmt.Println("this is the error here: ", err)
 	assert.NotNil(t, err)
 	assert.Nil(t, response)
 	assert.EqualValues(t, http.StatusForbidden, err.Code)
